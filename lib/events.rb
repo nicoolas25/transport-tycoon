@@ -25,12 +25,13 @@ class Event
     #   ]
     # }
     result = to_hash
+    cargos = result.delete(:cargos)
     carrier = result.delete(:carrier)
     result[:transport_id] = carrier.name
     result[:kind] = carrier.class.to_s.upcase
     result[:location] = result[:location].name
     result[:destination] = result[:destination].name
-    result[:cargo] = [result[:cargo]].compact.map do |cargo|
+    result[:cargo] = cargos.map do |cargo|
       { cargo_id: cargo.name, destination: cargo.destination.name, origin: "FACTORY" }
     end
 
@@ -45,7 +46,7 @@ class Event
       carrier: @carrier_state.carrier,
       location: @carrier_state.place,
       destination: @carrier_state.place,
-      cargo: @carrier_state.cargo
+      cargos: @carrier_state.cargos
     }.merge(@overrides)
   end
 end

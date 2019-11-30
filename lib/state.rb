@@ -1,8 +1,8 @@
 PlaceState = Struct.new(:place, :cargos, keyword_init: true)
 
-CarrierState = Struct.new(:carrier, :type, :from_time, :to_time, :place, :cargo, keyword_init: true) do
-  def available_space?
-    cargo.nil?
+CarrierState = Struct.new(:carrier, :type, :from_time, :to_time, :place, :cargos, keyword_init: true) do
+  def available_space
+    carrier.capacity - cargos.size
   end
 
   def origin?
@@ -10,15 +10,15 @@ CarrierState = Struct.new(:carrier, :type, :from_time, :to_time, :place, :cargo,
   end
 
   def cargo_destination?
-    place == cargo&.destination
+    place == cargos.first&.destination
   end
 
   def destination
-    cargo&.destination || carrier.origin
+    cargos.first&.destination || carrier.origin
   end
 
   def stucked?(map:)
-    return false unless (destination = cargo&.destination)
+    return false unless (destination = cargos.first&.destination)
 
     !map.can_move?(carrier: carrier, from: place, to: destination)
   end
@@ -60,14 +60,13 @@ State = Struct.new(:time, :map, :place_states, :carrier_states, :events, keyword
 
     case carrier_state.type
     when :idle
-      loadable_cargo = place_state.cargos.first
+      loadable_cargos = place_state.cargos.first(carrier_state.available_space)
 
       if carrier_state.origin? &&
-          carrier_state.available_space? &&
-          loadable_cargo &&
-          map.can_move?(carrier: carrier_state.carrier, from: carrier_state.place, to: loadable_cargo.destination)
+          loadable_cargos.any? &&
+          map.can_move?(carrier: carrier_state.carrier, from: carrier_state.place, to: loadable_cargos.first.destination)
 
-        load!(carrier_state: carrier_state, place_state: place_state, cargo: loadable_cargo)
+        load!(carrier_state: carrier_state, place_state: place_state, cargos: loadable_cargos)
 
       elsif carrier_state.cargo_destination? || carrier_state.stucked?(map: map)
         unload!(carrier_state: carrier_state, place_state: place_state)
@@ -87,10 +86,10 @@ State = Struct.new(:time, :map, :place_states, :carrier_states, :events, keyword
     end
   end
 
-  def load!(carrier_state:, place_state:, cargo:)
+  def load!(carrier_state:, place_state:, cargos:)
     place_states[place_state.place] = PlaceState.new(
       place: place_state.place,
-      cargos: place_state.cargos - [cargo],
+      cargos: place_state.cargos - cargos,
     )
 
     carrier_states[carrier_state.carrier] = new_carrier_state = CarrierState.new(
@@ -99,7 +98,7 @@ State = Struct.new(:time, :map, :place_states, :carrier_states, :events, keyword
       from_time: time,
       to_time: time + carrier_state.carrier.loading_time,
       place: carrier_state.place,
-      cargo: cargo,
+      cargos: cargos,
     )
 
     events << Event.new(name: "LOAD", carrier_state: new_carrier_state)
@@ -118,18 +117,18 @@ State = Struct.new(:time, :map, :place_states, :carrier_states, :events, keyword
       from_time: time,
       to_time: time + road.distance,
       place: next_place,
-      cargo: carrier_state.cargo,
+      cargos: carrier_state.cargos,
     )
 
     events << Event.new(name: "DEPART", carrier_state: new_carrier_state, location: carrier_state.place)
   end
 
   def unload!(carrier_state:, place_state:)
-    unloadable_cargo = carrier_state.cargo
+    unloadable_cargos = carrier_state.cargos
 
     place_states[place_state.place] = PlaceState.new(
       place: place_state.place,
-      cargos: place_state.cargos + [unloadable_cargo],
+      cargos: place_state.cargos + unloadable_cargos,
     )
 
     carrier_states[carrier_state.carrier] = new_carrier_state = CarrierState.new(
@@ -138,10 +137,10 @@ State = Struct.new(:time, :map, :place_states, :carrier_states, :events, keyword
       from_time: time,
       to_time: time + carrier_state.carrier.loading_time,
       place: carrier_state.place,
-      cargo: nil,
+      cargos: [],
     )
 
-    events << Event.new(name: "UNLOAD", carrier_state: new_carrier_state, cargo: unloadable_cargo)
+    events << Event.new(name: "UNLOAD", carrier_state: new_carrier_state, cargos: unloadable_cargos)
   end
 
   def end_travel!(carrier_state:)
@@ -151,7 +150,7 @@ State = Struct.new(:time, :map, :place_states, :carrier_states, :events, keyword
       from_time: time,
       to_time: time,
       place: carrier_state.place,
-      cargo: carrier_state.cargo,
+      cargos: carrier_state.cargos,
     )
 
     events << Event.new(name: "ARRIVE", carrier_state: new_carrier_state)

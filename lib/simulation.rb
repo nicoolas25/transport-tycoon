@@ -28,7 +28,7 @@ class Simulation
   end
 
   def all_cargo_delivered?
-    state.carrier_states.values.all? { |carrier_state| carrier_state.cargo.nil? } &&
+    state.carrier_states.values.all? { |carrier_state| carrier_state.cargos.empty? } &&
       state.place_states.all? { |place, place_state| place_state.cargos.all? { |cargo| place == cargo.destination } }
   end
 end

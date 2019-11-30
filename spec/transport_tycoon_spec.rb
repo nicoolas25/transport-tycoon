@@ -42,7 +42,7 @@ RSpec.describe "Simulation's step", aggregate_failures: true do
           location_b => PlaceState.new(place: location_b, cargos: []),
         },
         carrier_states: {
-          truck => CarrierState.new(carrier: truck, type: :idle, from_time: 0, to_time: 0, place: location_a, cargo: nil),
+          truck => CarrierState.new(carrier: truck, type: :idle, from_time: 0, to_time: 0, place: location_a, cargos: []),
         },
         events: [],
       )
@@ -58,7 +58,7 @@ RSpec.describe "Simulation's step", aggregate_failures: true do
         place: location_a,
         from_time: 1,
         to_time: 2,
-        cargo: nil,
+        cargos: [],
       )
     end
 
@@ -68,7 +68,7 @@ RSpec.describe "Simulation's step", aggregate_failures: true do
         place: location_a,
         from_time: 2,
         to_time: 2,
-        cargo: nil,
+        cargos: [],
       )
     end
 
@@ -78,7 +78,7 @@ RSpec.describe "Simulation's step", aggregate_failures: true do
         place: location_a,
         from_time: 2,
         to_time: 2,
-        cargo: nil,
+        cargos: [],
       )
     end
 
@@ -128,7 +128,7 @@ RSpec.describe "Simulation's step", aggregate_failures: true do
           from_time: 0,
           to_time: 2,
           place: location_b,
-          cargo: cargo,
+          cargos: [cargo],
         )
       end
 
@@ -142,7 +142,7 @@ RSpec.describe "Simulation's step", aggregate_failures: true do
           from_time: 2,
           to_time: 4,
           place: location_a,
-          cargo: nil,
+          cargos: [],
         )
       end
     end
@@ -202,7 +202,7 @@ RSpec.describe "Simulation's step", aggregate_failures: true do
           location_c => PlaceState.new(place: location_c, cargos: []),
         },
         carrier_states: {
-          truck => CarrierState.new(carrier: truck, type: :idle, from_time: 0, to_time: 0, place: location_a, cargo: nil),
+          truck => CarrierState.new(carrier: truck, type: :idle, from_time: 0, to_time: 0, place: location_a, cargos: []),
         },
         events: [],
       )
@@ -214,7 +214,7 @@ RSpec.describe "Simulation's step", aggregate_failures: true do
         place: location_c,
         from_time: 1,
         to_time: 2,
-        cargo: cargo,
+        cargos: [cargo],
       )
     end
 
@@ -244,7 +244,7 @@ RSpec.describe "Simulation's step", aggregate_failures: true do
           place: location_a,
           from_time: 1,
           to_time: 2,
-          cargo: nil,
+          cargos: [],
         )
 
         expect(simulation.step.state.place_states.fetch(location_b)).to have_attributes(
@@ -295,7 +295,7 @@ RSpec.describe "Simulation's step", aggregate_failures: true do
           location_b => PlaceState.new(place: location_b, cargos: []),
         },
         carrier_states: {
-          ship => CarrierState.new(carrier: ship, type: :idle, from_time: 0, to_time: 0, place: location_a, cargo: nil),
+          ship => CarrierState.new(carrier: ship, type: :idle, from_time: 0, to_time: 0, place: location_a, cargos: []),
         },
         events: [],
       )
@@ -311,7 +311,7 @@ RSpec.describe "Simulation's step", aggregate_failures: true do
         place: location_a,
         from_time: 1,
         to_time: 2,
-        cargo: nil,
+        cargos: [],
       )
     end
 

@@ -10,7 +10,7 @@ map = Map.new(
   roads: [
     factory_to_wharehouse_b = TruckRoad.new(factory, wharehouse_b, distance: 5),
     factory_to_port         = TruckRoad.new(factory, port, distance: 1),
-    port_to_wharehouse_a    = ShipRoad.new(port, wharehouse_a, distance: 4),
+    port_to_wharehouse_a    = ShipRoad.new(port, wharehouse_a, distance: 6),
   ],
   itineraries: {
     [factory, wharehouse_a] => [port, factory_to_port],
@@ -30,7 +30,7 @@ map = Map.new(
 vehicles = [
   truck_1 = Truck.new(name: 1, origin: factory),
   truck_2 = Truck.new(name: 2, origin: factory),
-  ship    = Ship.new(name: 1, origin: port),
+  ship    = Ship.new(name: 1, origin: port, loading_time: 1, capacity: 4),
 ]
 
 designations = ARGV[0].chomp.split("").map do |name|
@@ -47,7 +47,7 @@ state = State.new(
   time: 0,
   map: map,
   carrier_states: vehicles.each_with_object({}) do |vehicle, states|
-    states[vehicle] = CarrierState.new(carrier: vehicle, type: :idle, from_time: 0, to_time: 0, place: vehicle.origin, cargo: nil)
+    states[vehicle] = CarrierState.new(carrier: vehicle, type: :idle, from_time: 0, to_time: 0, place: vehicle.origin, cargos: [])
   end,
   place_states: {
     factory => PlaceState.new(place: factory, cargos: cargos),
