@@ -28,9 +28,9 @@ map = Map.new(
 )
 
 vehicles = [
-  truck_1 = Truck.new(name: "1", origin: factory),
-  truck_2 = Truck.new(name: "2", origin: factory),
-  ship    = Ship.new(name: "1", origin: port),
+  truck_1 = Truck.new(name: 1, origin: factory),
+  truck_2 = Truck.new(name: 2, origin: factory),
+  ship    = Ship.new(name: 1, origin: port),
 ]
 
 designations = ARGV[0].chomp.split("").map do |name|
@@ -55,6 +55,7 @@ state = State.new(
     wharehouse_b => PlaceState.new(place: wharehouse_b, cargos: []),
     port => PlaceState.new(place: port, cargos: []),
   },
+  events: [],
 )
 
 simulation = Simulation.new(state: state)
@@ -63,4 +64,6 @@ while !simulation.all_cargo_delivered?
   simulation = simulation.step
 end
 
-puts simulation.state.time
+simulation.state.events.each do |event|
+  puts event.to_json
+end

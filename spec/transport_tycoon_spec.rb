@@ -44,6 +44,7 @@ RSpec.describe "Simulation's step", aggregate_failures: true do
         carrier_states: {
           truck => CarrierState.new(carrier: truck, type: :idle, from_time: 0, to_time: 0, place: location_a, cargo: nil),
         },
+        events: [],
       )
     end
 
@@ -203,6 +204,7 @@ RSpec.describe "Simulation's step", aggregate_failures: true do
         carrier_states: {
           truck => CarrierState.new(carrier: truck, type: :idle, from_time: 0, to_time: 0, place: location_a, cargo: nil),
         },
+        events: [],
       )
     end
 
@@ -295,6 +297,7 @@ RSpec.describe "Simulation's step", aggregate_failures: true do
         carrier_states: {
           ship => CarrierState.new(carrier: ship, type: :idle, from_time: 0, to_time: 0, place: location_a, cargo: nil),
         },
+        events: [],
       )
     end
 

@@ -1,3 +1,4 @@
+require_relative "./events"
 require_relative "./location"
 require_relative "./carriers"
 require_relative "./roads"

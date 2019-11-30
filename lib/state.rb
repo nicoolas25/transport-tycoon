@@ -24,13 +24,14 @@ CarrierState = Struct.new(:carrier, :type, :from_time, :to_time, :place, :cargo,
   end
 end
 
-State = Struct.new(:time, :map, :place_states, :carrier_states, keyword_init: true) do
+State = Struct.new(:time, :map, :place_states, :carrier_states, :events, keyword_init: true) do
   def tick
     State.new(
       time: time + 1,
       map: map,
       place_states: place_states.dup,
       carrier_states: carrier_states.dup,
+      events: events.dup,
     )
   end
 
@@ -40,6 +41,7 @@ State = Struct.new(:time, :map, :place_states, :carrier_states, keyword_init: tr
       map: map,
       place_states: place_states.dup,
       carrier_states: carrier_states.dup,
+      events: events.dup,
     )
 
     carrier_states.each do |carrier, carrier_state|
@@ -91,7 +93,7 @@ State = Struct.new(:time, :map, :place_states, :carrier_states, keyword_init: tr
       cargos: place_state.cargos - [cargo],
     )
 
-    carrier_states[carrier_state.carrier] = CarrierState.new(
+    carrier_states[carrier_state.carrier] = new_carrier_state = CarrierState.new(
       type: :loading,
       carrier: carrier_state.carrier,
       from_time: time,
@@ -99,6 +101,8 @@ State = Struct.new(:time, :map, :place_states, :carrier_states, keyword_init: tr
       place: carrier_state.place,
       cargo: cargo,
     )
+
+    events << Event.new(name: "LOAD", carrier_state: new_carrier_state)
   end
 
   def travels!(carrier_state:)
@@ -108,7 +112,7 @@ State = Struct.new(:time, :map, :place_states, :carrier_states, keyword_init: tr
       to: carrier_state.destination,
     )
 
-    carrier_states[carrier_state.carrier] = CarrierState.new(
+    carrier_states[carrier_state.carrier] = new_carrier_state = CarrierState.new(
       type: :traveling,
       carrier: carrier_state.carrier,
       from_time: time,
@@ -116,6 +120,8 @@ State = Struct.new(:time, :map, :place_states, :carrier_states, keyword_init: tr
       place: next_place,
       cargo: carrier_state.cargo,
     )
+
+    events << Event.new(name: "DEPART", carrier_state: new_carrier_state, location: carrier_state.place)
   end
 
   def unload!(carrier_state:, place_state:)
@@ -126,7 +132,7 @@ State = Struct.new(:time, :map, :place_states, :carrier_states, keyword_init: tr
       cargos: place_state.cargos + [unloadable_cargo],
     )
 
-    carrier_states[carrier_state.carrier] = CarrierState.new(
+    carrier_states[carrier_state.carrier] = new_carrier_state = CarrierState.new(
       type: :unloading,
       carrier: carrier_state.carrier,
       from_time: time,
@@ -134,10 +140,12 @@ State = Struct.new(:time, :map, :place_states, :carrier_states, keyword_init: tr
       place: carrier_state.place,
       cargo: nil,
     )
+
+    events << Event.new(name: "UNLOAD", carrier_state: new_carrier_state, cargo: unloadable_cargo)
   end
 
   def end_travel!(carrier_state:)
-    carrier_states[carrier_state.carrier] = CarrierState.new(
+    carrier_states[carrier_state.carrier] = new_carrier_state = CarrierState.new(
       type: :idle,
       carrier: carrier_state.carrier,
       from_time: time,
@@ -145,5 +153,7 @@ State = Struct.new(:time, :map, :place_states, :carrier_states, keyword_init: tr
       place: carrier_state.place,
       cargo: carrier_state.cargo,
     )
+
+    events << Event.new(name: "ARRIVE", carrier_state: new_carrier_state)
   end
 end
